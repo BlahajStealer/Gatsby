@@ -10,6 +10,11 @@ TagManager:
   - Loser1
   - Bar
   - Phone
+  - Exit
+  - Meyer
+  - Customer
+  - ExitBar
+  - Loser2
   layers:
   - Default
   - TransparentFX

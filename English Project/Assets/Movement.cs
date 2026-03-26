@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class Movement : MonoBehaviour
 {
@@ -13,9 +14,16 @@ public class Movement : MonoBehaviour
     bool walkingB = false;
     bool walkingF = false;
     bool walkingS = false;
+    Objectives ob;
+    public GameObject obObj;
 
     void Start()
     {
+        if (obObj != null)
+        {
+            ob = obObj.GetComponent<Objectives>();
+
+        }
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
     }
@@ -121,5 +129,12 @@ public class Movement : MonoBehaviour
         anim.SetBool("WalkForward", false);
         anim.SetBool("BackIdle", false);
         anim.SetBool("BackWalk", false);
+    }
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.gameObject.CompareTag("Exit") && ob.DoneScene)
+        {
+            SceneManager.LoadScene(3);
+        }
     }
 }

@@ -28,16 +28,33 @@ public class raycast : MonoBehaviour
     public GameObject tsObj;
     TextSystem ts;
     public bool p1inter = false;
+    public bool p2inter = false;
     float sulkTimer = 0;
     public GameObject ObjectivesObj;
     Objectives ob;
     int TablesActive = 0;
     bool barTrue = false;
     bool phoneTrue = false;
-
+    public string[] MeyerLines;
+    bool InteractingWithMeyer;
+    int CurrentLine = 0;
+    int currentProf = 2;
+    bool Customer = false;
+    MinigameManager mm;
+    public GameObject mmObj;
+    public string[] DialogueP2;
+    int current = 0;
+    int currentLoser = 2;
+    public bool firstScene = true;
+    bool startThis = false;
+    public bool Scene4;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        if (mmObj != null)
+        {
+            mm = mmObj.GetComponent<MinigameManager>();
+        }
         if (ObjectivesObj != null)
         {
             ob = ObjectivesObj.GetComponent<Objectives>();
@@ -51,7 +68,13 @@ public class raycast : MonoBehaviour
         {
             sr = BlackPanel.GetComponent<SpriteRenderer>();
             sr.material.color = startColor;
-            GatsbyText.SetActive(false);
+            if (firstScene)
+            {
+                GatsbyText.SetActive(false);
+            
+            }
+                
+            
         }
 
 
@@ -63,62 +86,75 @@ public class raycast : MonoBehaviour
     {
         if (BlackPanel != null)
         {
-            if (end)
+            if (!firstScene && startThis)
             {
-                EndTimer += Time.deltaTime;
-                SecondAct = false;
-                done = false;
-
-                if (EndTimer > 3)
-                {
-                    GatsbyText.SetActive(true);
-                    sr = GatsbyText.GetComponent<SpriteRenderer>();
-                    endGatzB = true;
-                    startColor = startGatz;
-                    endColor = endGatz;
-                    StartCoroutine(ChangeColor(false));
-                }
-            }
-            if (LookingAtButton && Keyboard.current.eKey.wasPressedThisFrame)
-            {
-                Debug.Log("Pressed!");
-                StartCoroutine(ChangeColor(true));
-
-                LookingAtButton = false;
-            }
-            if (done)
-            {
-                done = false;
-                Color start = startColor;
-                startColor = endColor;
-                endColor = start;
-
+                startThis = false;
                 StartCoroutine(ChangeColor(false));
-
-            }
-            if (SecondAct)
+            } 
+            else if (firstScene)
             {
-                Timer += Time.deltaTime;
-                if (Timer >= 8)
+                if (end)
                 {
-                    end = true;
-                    Color start = startColor;
-                    startColor = endColor;
-                    endColor = start;
+                    EndTimer += Time.deltaTime;
                     SecondAct = false;
-                    StartCoroutine(ChangeColor(false));
-                }
-            }
-            if (endGatzB)
-            {
-                sulkTimer += Time.deltaTime;
-                if (sulkTimer >= 4)
-                {
-                    SceneManager.LoadScene(2);
-                }
-            }
+                    done = false;
 
+                    if (EndTimer > 3)
+                    {
+                        GatsbyText.SetActive(true);
+                        sr = GatsbyText.GetComponent<SpriteRenderer>();
+                        endGatzB = true;
+                        startColor = startGatz;
+                        endColor = endGatz;
+                        StartCoroutine(ChangeColor(false));
+                    }
+                }
+                if (LookingAtButton && Keyboard.current.eKey.wasPressedThisFrame)
+                {
+                    Debug.Log("Pressed!");
+                    StartCoroutine(ChangeColor(true));
+
+                    LookingAtButton = false;
+                }
+                if (done)
+                {
+                    done = false;
+                    if (firstScene)
+                    {
+                        Color start = startColor;
+                        startColor = endColor;
+                        endColor = start;
+
+                        StartCoroutine(ChangeColor(false));
+                    }
+
+
+                }
+                if (SecondAct)
+                {
+                    Timer += Time.deltaTime;
+                    if (Timer >= 8)
+                    {
+                        end = true;
+                        Color start = startColor;
+                        startColor = endColor;
+                        endColor = start;
+                        SecondAct = false;
+                        StartCoroutine(ChangeColor(false));
+                    }
+                }
+                if (endGatzB)
+                {
+                    sulkTimer += Time.deltaTime;
+                    if (sulkTimer >= 4)
+                    {
+                        SceneManager.LoadScene(2);
+                    }
+                }
+            }
         }
+
+
         if (barTrue && Keyboard.current.eKey.wasPressedThisFrame)
         {
             GameObject child = childt2.gameObject;
@@ -133,6 +169,21 @@ public class raycast : MonoBehaviour
             ob.BandDone = true;
             
         }
+        if (p2inter && Keyboard.current.eKey.wasPressedThisFrame)
+        {
+            ob.TableDone = true;
+            if (current == DialogueP2.Length)
+            {
+                startThis = true;
+                ts.off();
+            } else
+            {
+                ts.Interaction(DialogueP2[current], currentLoser);
+                current++;
+            }
+            if (currentLoser == 2) currentLoser = 0; else currentLoser = 2;
+
+        }
         if (inTable && Keyboard.current.eKey.wasPressedThisFrame)
         {
             GameObject child = childt.gameObject;
@@ -146,10 +197,39 @@ public class raycast : MonoBehaviour
                 }
             }
         }
+        if (InteractingWithMeyer && Keyboard.current.eKey.wasPressedThisFrame)
+        {
+            if (CurrentLine == MeyerLines.Length - 1)
+            {
+                ts.off();
+                ob.newObj = true;
+            } else
+            {
+                if (currentProf == 2)
+                {
+                    currentProf--;
 
+                } else if (currentProf == 1)
+                {
+                    currentProf++;
+                }
+                ts.Interaction(MeyerLines[CurrentLine], currentProf);
+
+
+                CurrentLine++;
+                
+            }
+            
+        }
         if (phoneTrue && ob.objectivesFinished == 3 && Keyboard.current.eKey.wasPressedThisFrame)
         {
             ts.Interaction("It's WolfSheim. You need to get down to the Pharmacy. Now.", 1);
+            ob.phoneDone = true;
+        }
+        if (Customer && Keyboard.current.eKey.wasPressedThisFrame)
+        {
+            mm.nextFunc();
+            Customer=false;
         }
     }
     
@@ -172,6 +252,22 @@ public class raycast : MonoBehaviour
         else if (other.gameObject.CompareTag("Phone"))
         {
             phoneTrue = true;
+        } else if (other.gameObject.CompareTag("Meyer"))
+        {
+            InteractingWithMeyer = true;
+        } if (other.gameObject.CompareTag("Customer"))
+        {
+            Customer = true;
+        }
+        if (mmObj != null)
+        {
+            if (other.gameObject.CompareTag("ExitBar") && mm.CanLeave)
+            {
+                SceneManager.LoadScene(4);
+            }
+        }else if (other.gameObject.CompareTag("Loser2"))
+        {
+            p2inter = true;
         }
     }
     void OnTriggerExit2D(Collider2D other) {
@@ -195,7 +291,19 @@ public class raycast : MonoBehaviour
         } else if (other.gameObject.CompareTag("Phone"))
         {
             phoneTrue = false;
+            ts.off();
+        }else if (other.gameObject.CompareTag("Meyer"))
+        {
+            InteractingWithMeyer = false;
+        }if (other.gameObject.CompareTag("Customer"))
+        {
+            Customer = false;
+        }else if (other.gameObject.CompareTag("Loser2"))
+        {
+            p2inter = false;
+            ts.off();
         }
+
     }
 
     public IEnumerator ChangeColor(bool first)
@@ -205,7 +313,7 @@ public class raycast : MonoBehaviour
         {
             t += Time.deltaTime;
             float blend = Mathf.Clamp01(t/duration);
-            sr.material.color = Color.Lerp (startColor, endColor, blend);
+            sr.material.color = Color.Lerp(startColor, endColor, blend);
 
             yield return null;
         }
@@ -227,9 +335,15 @@ public class raycast : MonoBehaviour
         }
 
 
-            TheGreatestGatsbyThatEverLived.GetComponent<SpriteRenderer>().enabled = false;
-
-        First.SetActive(false);
-        Second.SetActive(false);
+        TheGreatestGatsbyThatEverLived.GetComponent<SpriteRenderer>().enabled = false;
+        if (firstScene)
+        {
+            First.SetActive(false);
+            Second.SetActive(false);
+        } else
+        {
+            Scene4 = true;
+        }
+        
     }
 }

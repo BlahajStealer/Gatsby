@@ -3,6 +3,11 @@ using UnityEngine;
 public class CameraScript : MonoBehaviour
 {
     public GameObject Player;
+    public Vector3 TopLeft;
+    public Vector3 BottomRight;
+    // 8.67 10.3
+    //-1.23f -26.86
+
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -15,14 +20,14 @@ public class CameraScript : MonoBehaviour
     {
         Vector3 PositionToBe = Player.transform.position;
         PositionToBe.z = -10;
-        if (PositionToBe.x >= 8.67f && PositionToBe.x <= 10.3f)
+        if (PositionToBe.x >= TopLeft.x && PositionToBe.x <= BottomRight.x)
         {
             PositionToBe.x = Player.transform.position.x;
         } else
         {
             PositionToBe.x = transform.position.x;
         }
-        if (PositionToBe.y <= -1.23f && PositionToBe.y >= -26.86)
+        if (PositionToBe.y <= TopLeft.y && PositionToBe.y >= BottomRight.y)
         {
             PositionToBe.y = Player.transform.position.y;
         } else
