@@ -48,6 +48,9 @@ public class raycast : MonoBehaviour
     public bool firstScene = true;
     bool startThis = false;
     public bool Scene4;
+    public string[] LinesForParty;
+    bool startTalking = false;
+    int currentLineForNick = 0;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -231,6 +234,18 @@ public class raycast : MonoBehaviour
             mm.nextFunc();
             Customer=false;
         }
+        if (startTalking && Keyboard.current.eKey.wasPressedThisFrame)
+        {
+            if (currentLineForNick <= LinesForParty.Length - 1)
+            {
+                ts.Interaction(LinesForParty[currentLineForNick], 2);
+                currentLineForNick++;
+            } else
+            {
+                ts.off();
+            }
+
+        }
     }
     
     void OnTriggerStay2D(Collider2D other) {
@@ -303,6 +318,11 @@ public class raycast : MonoBehaviour
             p2inter = false;
             ts.off();
         }
+        if (other.gameObject.CompareTag("Nick's table"))
+        {
+            startTalking = true;
+        }
+        
 
     }
 
