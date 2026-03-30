@@ -9,17 +9,29 @@ EditorBuildSettings:
     path: Assets/Scenes/Menu.unity
     guid: a24b9ca4cd5e40a4890b9078b2e6d22d
   - enabled: 1
-    path: Assets/Scenes/SampleScene.unity
+    path: Assets/Scenes/Start.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
   - enabled: 1
-    path: Assets/Scenes/SampleScene 1.unity
+    path: Assets/Scenes/FirstHouse.unity
     guid: 8e6d632adb979944c9a1065f354664aa
   - enabled: 1
-    path: Assets/Scenes/SampleScene 2.unity
+    path: Assets/Scenes/Pharmacy.unity
     guid: a5d3d5ad3e4fe47ada1d0306e726da48
   - enabled: 1
-    path: Assets/Scenes/SampleScene 3.unity
+    path: Assets/Scenes/Invitation.unity
     guid: 5fd7a0f9468bb4f09aeb565ff7ae8991
+  - enabled: 1
+    path: Assets/Scenes/Party.unity
+    guid: 361f64ffd82c44471b48f28c7cde1445
+  - enabled: 1
+    path: Assets/Scenes/GatsbyRun.unity
+    guid: d067b0c1ae466b64a9f4081377d0c509
+  - enabled: 1
+    path: Assets/Scenes/GatsbyDriving.unity
+    guid: c2ec37aac2bf45c4fb76ed211006ce32
+  - enabled: 1
+    path: Assets/Scenes/NYC.unity
+    guid: 399784b45f5873242b8904d4c19a0dc6
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0
