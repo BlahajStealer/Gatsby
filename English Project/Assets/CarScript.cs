@@ -135,7 +135,7 @@ public class CarScript : MonoBehaviour
         {
             if (currentOne >= 7)
             {
-                Debug.Log("Next Scene");
+                SceneManager.LoadScene(8);
             }
             else
             {

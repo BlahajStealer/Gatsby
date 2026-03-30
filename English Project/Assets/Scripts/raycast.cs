@@ -71,7 +71,19 @@ public class raycast : MonoBehaviour
     public string[] waiterLines;
     public int[] WaiterProfs;
     int currentLine = 0;
-    bool tableSeated = false;
+    public bool tableSeated = false;
+    public GameObject chosentable;
+    bool lookingAtTable;
+
+    public string[] PhoneLines;
+    public int[] TalkingTo;
+    bool SecondPhone;
+    int currentLinePhone = 0;
+    bool SecondWave = false;
+    bool PhoneDone = false;
+    public string[] SecondWaveLines;
+    public int[] SecondWaveProfs;
+    int secondWaveLines;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -108,13 +120,54 @@ public class raycast : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (PhoneDone && lookingAtTable && Keyboard.current.eKey.wasPressedThisFrame)
+        {
+            if (secondWaveLines < SecondWaveLines.Length)
+            {
+                ts.Interaction(SecondWaveLines[secondWaveLines], SecondWaveProfs[secondWaveLines]);
+                secondWaveLines++;
+            } else
+            {
+                ts.off();
+            }
+        }
+        if (SecondPhone && Keyboard.current.eKey.wasPressedThisFrame && SecondWave)
+        {
+            if (currentLinePhone < PhoneLines.Length)
+            {
+                ts.Interaction(PhoneLines[currentLinePhone], TalkingTo[currentLinePhone]);
+                currentLinePhone++;
+            } else
+            {
+                PhoneDone = true;
+                ts.off();
+            }
+        }
+        if (lookingAtTable && Keyboard.current.eKey.wasPressedThisFrame && DoneWithMeyer)
+        {
+            tableSeated = true;
+        } else
+        {
+            tableSeated = false;
+        }
         if (talkingToWaiter && Keyboard.current.eKey.wasPressedThisFrame && DoneWithMeyer)
         {
             ts.Interaction("Hello, please seat yourself anywhere you wish", 3);
-        }
-        if (tableSeated && Keyboard.current.eKey.wasPressedThisFrame && DoneWithMeyer)
-        {
 
+        }
+        if (lookingAtTable && Keyboard.current.eKey.wasPressedThisFrame && DoneWithMeyer && !PhoneDone)
+        {
+            if (currentLine < waiterLines.Length)
+            {
+                ts.Interaction(waiterLines[currentLine], WaiterProfs[currentLine]);
+                currentLine++;
+            } else
+            {
+                ts.off();
+                SecondWave = true;
+                
+                tableSeated = false;
+            }
         }
 
 
@@ -286,7 +339,7 @@ public class raycast : MonoBehaviour
         }
         if (InteractingWithMeyer && Keyboard.current.eKey.wasPressedThisFrame)
         {
-            if (SceneManager.GetActiveScene().buildIndex == 8)
+            if (SceneManager.GetActiveScene().buildIndex == 8 && !DoneWithMeyer)
             {
                 if (CurrentLine >= MeyerNYCLines.Length - 1)
                 {
@@ -406,6 +459,15 @@ public class raycast : MonoBehaviour
         } else if (other.gameObject.CompareTag("Waiter"))
         {
             talkingToWaiter = true;
+        } else if (other.gameObject.CompareTag("TableNYC"))
+        {
+            chosentable = other.gameObject;
+
+            lookingAtTable = true;
+            
+        } else if (other.gameObject.CompareTag("Phone2"))
+        {
+            SecondPhone = true;
         }
     }
     void OnTriggerExit2D(Collider2D other) {
@@ -449,15 +511,19 @@ public class raycast : MonoBehaviour
             SpeakingWithLoser = false;
         } else if (other.gameObject.CompareTag("TableNYC"))
         {
-            tableSeated = true;
+            lookingAtTable = false;
         } else if (other.gameObject.CompareTag("Waiter"))
         {
             ts.off();
+            talkingToWaiter = false;
+        } else if (other.gameObject.CompareTag("Phone2"))
+        {
+            SecondPhone = false;
         }
 
 
     }
-
+    
     public IEnumerator ChangeColor(bool first)
     {
         if (Scene5)

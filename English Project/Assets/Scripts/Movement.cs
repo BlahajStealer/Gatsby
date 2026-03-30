@@ -20,9 +20,12 @@ public class Movement : MonoBehaviour
     public GameObject obObj;
     public GameObject NickCarryAway;
     Animator ani;
+    Animator wAni;
+    
     public GameObject NickTrans;
     public GameObject MeyerTrans;
     public GameObject Meyer;
+    bool stopAnims = true;
     void Start()
     {
         if (obObj != null)
@@ -32,6 +35,7 @@ public class Movement : MonoBehaviour
         }
         if (NickCarryAway != null)
         {
+            wAni = Meyer.GetComponent<Animator>();
             ani = NickCarryAway.GetComponent<Animator>();
 
         }
@@ -46,10 +50,14 @@ public class Movement : MonoBehaviour
 
     void FixedUpdate()
     {
-        NickCarryAway.transform.position = NickTrans.transform.position;
+        if (NickCarryAway != null && stopAnims)
+        {
+            NickCarryAway.transform.position = NickTrans.transform.position;
+            
+        }
         if (rc != null)
         {
-            if (rc.DoneWithMeyer)
+            if (rc.DoneWithMeyer && Meyer != null && stopAnims)
             {
                 Debug.Log("Hai");
                 Meyer.transform.position = MeyerTrans.transform.position;
@@ -61,6 +69,37 @@ public class Movement : MonoBehaviour
 
     void Update()
     {
+        if (!rc.DoneWithMeyer)
+        {
+            SetWolfFalse();
+            wAni.SetBool("Front", true);
+        }
+        if (rc != null)
+        {
+            if (rc.tableSeated)
+            {
+                stopAnims = false;
+                if (rc.chosentable.transform.position.x < 8)
+                {
+                    Meyer.transform.position = new Vector2(rc.chosentable.transform.position.x - 1.5f, rc.chosentable.transform.position.y);
+                    
+                } else
+                {
+                    Meyer.transform.position = new Vector2(rc.chosentable.transform.position.x + 1.5f, rc.chosentable.transform.position.y);
+                    
+                }
+                
+                NickCarryAway.transform.position =  new Vector2(rc.chosentable.transform.position.x, rc.chosentable.transform.position.y - 1.5f);
+                SetNickFalse();
+                ani.SetBool("Back", true);
+                if (rc.DoneWithMeyer)
+                {
+                    SetWolfFalse();
+                    ani.SetBool("Side", true);
+                }
+                
+            }
+        }
         move = GetComponent<PlayerInput>().actions["Move"].ReadValue<Vector2>();
 
         // W Key - Back walk
@@ -72,11 +111,16 @@ public class Movement : MonoBehaviour
         {
             SetAllFalse();
             anim.SetBool(walkingB ? "BackWalk" : "BackIdle", true);
-            if (NickCarryAway != null)
+            if (NickCarryAway != null && stopAnims)
             {
                 SetNickFalse();
                 ani.SetBool(walkingB ? "BackW" : "Back", true);
-
+                if (rc.DoneWithMeyer)
+                {
+                    SetWolfFalse();
+                    wAni.SetBool(walkingB ? "BackW" : "Back", true);
+                }
+                
             }
             Ray.transform.localPosition = new Vector2(0, 2.08f);
             Ray.transform.rotation = new Quaternion(0, 0, 0, 90);
@@ -86,11 +130,16 @@ public class Movement : MonoBehaviour
             walkingB = false;
             SetAllFalse();
             anim.SetBool("BackIdle", true);
-            if (NickCarryAway != null)
+            if (NickCarryAway != null && stopAnims)
             {
                 SetNickFalse();
                 ani.SetBool("Back", true);
-
+                if (rc.DoneWithMeyer)
+                {
+                    SetWolfFalse();
+                    wAni.SetBool("Back", true);
+                }
+                
             }
         }
 
@@ -103,10 +152,15 @@ public class Movement : MonoBehaviour
         {
             SetAllFalse();
             anim.SetBool(walkingF ? "WalkForward" : "Idle", true);
-            if (NickCarryAway != null)
+            if (NickCarryAway != null && stopAnims)
             {
                 SetNickFalse();
                 ani.SetBool(walkingF ? "FrontW" : "Front", true);
+                if (rc.DoneWithMeyer)
+                {
+                    SetWolfFalse();
+                    wAni.SetBool(walkingF ? "FrontW" : "Front", true);
+                }
 
             }
             Ray.transform.localPosition = new Vector2(0, -2.08f);
@@ -116,11 +170,12 @@ public class Movement : MonoBehaviour
         {
             walkingF = false;
             SetAllFalse();
-            if (NickCarryAway != null)
+            if (NickCarryAway != null && stopAnims)
             {
                 SetNickFalse();
                 ani.SetBool("Front", true);
-
+                SetWolfFalse();
+                wAni.SetBool("Front", true);
             }
             anim.SetBool("Idle", true);
         }
@@ -134,12 +189,14 @@ public class Movement : MonoBehaviour
         {
             SetAllFalse();
             anim.SetBool(walkingS ? "SideWalk" : "IdleSide", true);
-            if (NickCarryAway != null)
+            if (NickCarryAway != null && stopAnims)
             {
                 SetNickFalse();
                 ani.SetBool(walkingS ? "SideW" : "Side", true);
                 NickCarryAway.GetComponent<SpriteRenderer>().flipX = false;
-
+                SetWolfFalse();
+                wAni.SetBool(walkingS ? "SideW" : "Side", true);
+                Meyer.GetComponent<SpriteRenderer>().flipX = false;
             }
             Ray.transform.rotation = new Quaternion(0, 0, -90, 90);
             Ray.transform.localPosition = new Vector2(-2.08f, 0);
@@ -149,11 +206,12 @@ public class Movement : MonoBehaviour
         {
             walkingS = false;
             SetAllFalse();
-            if (NickCarryAway != null)
+            if (NickCarryAway != null && stopAnims)
             {
                 SetNickFalse();
                 ani.SetBool("Side", true);
-
+                SetWolfFalse();
+                wAni.SetBool("Side", true);
             }
             anim.SetBool("IdleSide", true);
         }
@@ -167,12 +225,14 @@ public class Movement : MonoBehaviour
         {
             SetAllFalse();
             anim.SetBool(walkingS ? "SideWalk" : "IdleSide", true);
-            if (NickCarryAway != null)
+            if (NickCarryAway != null && stopAnims)
             {
                 SetNickFalse();
                 ani.SetBool(walkingS ? "SideW" : "Side", true);
                 NickCarryAway.GetComponent<SpriteRenderer>().flipX = true;
-
+                SetWolfFalse();
+                wAni.SetBool(walkingS ? "SideW" : "Side", true);
+                Meyer.GetComponent<SpriteRenderer>().flipX = true;
             }
             Ray.transform.rotation = new Quaternion(0, 0, -90, 90);
             Ray.transform.localPosition = new Vector2(2.08f, 0);
@@ -183,11 +243,12 @@ public class Movement : MonoBehaviour
         {
             walkingS = false;
             SetAllFalse();
-            if (NickCarryAway != null)
+            if (NickCarryAway != null && stopAnims)
             {
                 SetNickFalse();
                 ani.SetBool("Side", true);
-
+                SetWolfFalse();
+                wAni.SetBool("Side", true);
             }
             anim.SetBool("IdleSide", true);
         }
@@ -210,6 +271,15 @@ public class Movement : MonoBehaviour
         ani.SetBool("BackW", false);
         ani.SetBool("Side", false);
         ani.SetBool("SideW", false);
+    }
+        void SetWolfFalse()
+    {
+        wAni.SetBool("Front", false);
+        wAni.SetBool("FrontW", false);
+        wAni.SetBool("Back", false);
+        wAni.SetBool("BackW", false);
+        wAni.SetBool("Side", false);
+        wAni.SetBool("SideW", false);
     }
     void OnTriggerEnter2D(Collider2D other)
     {

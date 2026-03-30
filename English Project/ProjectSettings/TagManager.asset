@@ -25,6 +25,7 @@ TagManager:
   - DoneTrig
   - TableNYC
   - Waiter
+  - Phone2
   layers:
   - Default
   - TransparentFX
