@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
-
+using System.Collections;
 public class Movement : MonoBehaviour
 {
 
@@ -26,6 +26,14 @@ public class Movement : MonoBehaviour
     public GameObject MeyerTrans;
     public GameObject Meyer;
     bool stopAnims = true;
+    public float speedOfMovement;
+    bool MoveMeyer = false;
+    bool setAnims = false;
+    public GameObject Transform1;
+    public GameObject Transform2;
+    bool nextOne = false;
+    public GameObject Trans;
+    public float speedOfSecond;
     void Start()
     {
         if (obObj != null)
@@ -52,16 +60,20 @@ public class Movement : MonoBehaviour
     {
         if (NickCarryAway != null && stopAnims)
         {
-            NickCarryAway.transform.position = NickTrans.transform.position;
-            
+            NickCarryAway.transform.position = Vector2.MoveTowards(
+                NickCarryAway.transform.position,
+                NickTrans.transform.position,
+                speedOfMovement * Time.deltaTime
+            );
         }
-        if (rc != null)
+
+        if (rc != null && rc.DoneWithMeyer && Meyer != null && stopAnims)
         {
-            if (rc.DoneWithMeyer && Meyer != null && stopAnims)
-            {
-                Debug.Log("Hai");
-                Meyer.transform.position = MeyerTrans.transform.position;
-            }
+            Meyer.transform.position = Vector2.MoveTowards(
+                Meyer.transform.position,
+                MeyerTrans.transform.position,
+                speedOfMovement * Time.deltaTime
+            );
         }
         Vector2 position = (Vector2)rb.position + move * speed * Time.deltaTime;
         rb.MovePosition(position);
@@ -69,25 +81,83 @@ public class Movement : MonoBehaviour
 
     void Update()
     {
-        if (!rc.DoneWithMeyer)
+        if (rc.MeyersDepart)
+        {
+            Meyer.transform.position = Vector2.MoveTowards(
+            Meyer.transform.position,
+            Transform1.transform.position,
+            speedOfSecond * Time.deltaTime
+           );
+            SetWolfFalse();
+            wAni.SetBool("FrontW", true);
+            if (Meyer.transform.position == Transform1.transform.position)
+            {
+                nextOne = true;
+                rc.MeyersDepart = false;
+            }
+        }
+        if (nextOne)
+        {
+            Meyer.transform.position = Vector2.MoveTowards(
+            Meyer.transform.position,
+            Transform2.transform.position,
+            speedOfSecond * Time.deltaTime
+            );
+            SetWolfFalse();
+            wAni.SetBool("FrontW", true);
+            if (Meyer.transform.position == Transform2.transform.position)
+            {
+                Meyer.SetActive( false );
+                nextOne = false;
+            }
+        }
+        if (stopAnims)
+        {
+            rc.endThisThing = false;
+        }
+        if (rc.MeyersDepart)
+        {
+            MoveMeyer = false;
+        }
+        if (!rc.DoneWithMeyer && wAni != null)
         {
             SetWolfFalse();
             wAni.SetBool("Front", true);
+        }
+        if (rc.NickRun)
+        {
+            rc.ReadyForTom = true;
+            Vector2 nickTarget = Trans.transform.position;
+            Vector2 nickDelta = nickTarget - (Vector2)NickCarryAway.transform.position;
+            NickCarryAway.transform.position = Vector2.MoveTowards(
+            NickCarryAway.transform.position,
+            nickTarget,
+            speedOfSecond * Time.deltaTime
+            );
+
+
+            if (nickDelta.magnitude > 0.05f) // only animate if actually moving
+            {
+                SetNickFalse();
+                ani.SetBool("BackW", true);
+
+            } else
+            {
+                SetNickFalse();
+                ani.SetBool("Back", true);
+            }
+
+
+
         }
         if (rc != null)
         {
             if (rc.tableSeated)
             {
+                MoveMeyer = true;
+
                 stopAnims = false;
-                if (rc.chosentable.transform.position.x < 8)
-                {
-                    Meyer.transform.position = new Vector2(rc.chosentable.transform.position.x - 1.5f, rc.chosentable.transform.position.y);
-                    
-                } else
-                {
-                    Meyer.transform.position = new Vector2(rc.chosentable.transform.position.x + 1.5f, rc.chosentable.transform.position.y);
-                    
-                }
+
                 
                 NickCarryAway.transform.position =  new Vector2(rc.chosentable.transform.position.x, rc.chosentable.transform.position.y - 1.5f);
                 SetNickFalse();
@@ -100,15 +170,81 @@ public class Movement : MonoBehaviour
                 
             }
         }
+
+        if (MoveMeyer)
+        {
+            if (rc.chosentable.transform.position.x < 8)
+            {
+
+                NickCarryAway.transform.position = Vector2.MoveTowards(
+                    NickCarryAway.transform.position,
+                    new Vector2(rc.chosentable.transform.position.x, rc.chosentable.transform.position.y - 1.5f),
+                    speedOfMovement * Time.deltaTime
+                );
+
+
+
+                Meyer.transform.position = Vector2.MoveTowards(
+                    Meyer.transform.position,
+                    new Vector2(rc.chosentable.transform.position.x - 1.5f, rc.chosentable.transform.position.y),
+                    speedOfMovement * Time.deltaTime
+                );
+                if (!setAnims)
+                {
+                    SetNickFalse();
+                    ani.SetBool("Back", true);
+                    SetWolfFalse();
+                    wAni.SetBool("Side", true);
+                    setAnims = true;
+                    Meyer.GetComponent<SpriteRenderer>().flipX = true;
+                }
+
+
+
+            }
+            else
+            {
+                NickCarryAway.transform.position = Vector2.MoveTowards(
+                    NickCarryAway.transform.position,
+                    new Vector2(rc.chosentable.transform.position.x, rc.chosentable.transform.position.y - 1.5f),
+                    speedOfMovement * Time.deltaTime
+                );
+
+
+                Meyer.transform.position = Vector2.MoveTowards(
+                    Meyer.transform.position,
+                    new Vector2(rc.chosentable.transform.position.x + 1.5f, rc.chosentable.transform.position.y),
+                    speedOfMovement * Time.deltaTime
+                );
+                if (!setAnims)
+                {
+                    SetNickFalse();
+                    ani.SetBool("Back", true);
+                    SetWolfFalse();
+                    wAni.SetBool("Side", true);
+                    setAnims = true;
+                    Meyer.GetComponent<SpriteRenderer>().flipX = false;
+                }
+
+            }
+        }
         move = GetComponent<PlayerInput>().actions["Move"].ReadValue<Vector2>();
 
         // W Key - Back walk
         if (Keyboard.current.wKey.wasPressedThisFrame)
         {
+            if (NickCarryAway != null && stopAnims)
+            {
+                NickTrans.transform.localPosition = new Vector2(0, -2.82f);
+                MeyerTrans.transform.localPosition = new Vector2(0, -5.87f);
+
+            }
             walkingB = true;
         }
         if (Keyboard.current.wKey.isPressed)
         {
+
+
             SetAllFalse();
             anim.SetBool(walkingB ? "BackWalk" : "BackIdle", true);
             if (NickCarryAway != null && stopAnims)
@@ -146,6 +282,12 @@ public class Movement : MonoBehaviour
         // S Key - Forward walk
         if (Keyboard.current.sKey.wasPressedThisFrame)
         {
+            if (NickCarryAway != null && stopAnims)
+            {
+                NickTrans.transform.localPosition = new Vector2(0, 2.82f);
+                MeyerTrans.transform.localPosition = new Vector2(0, 5.87f);
+
+            }
             walkingF = true;
         }
         if (Keyboard.current.sKey.isPressed)
@@ -154,6 +296,8 @@ public class Movement : MonoBehaviour
             anim.SetBool(walkingF ? "WalkForward" : "Idle", true);
             if (NickCarryAway != null && stopAnims)
             {
+
+
                 SetNickFalse();
                 ani.SetBool(walkingF ? "FrontW" : "Front", true);
                 if (rc.DoneWithMeyer)
@@ -174,8 +318,12 @@ public class Movement : MonoBehaviour
             {
                 SetNickFalse();
                 ani.SetBool("Front", true);
-                SetWolfFalse();
-                wAni.SetBool("Front", true);
+                if (rc.DoneWithMeyer)
+                {
+                    SetWolfFalse();
+                    wAni.SetBool("Front", true);
+                }
+                
             }
             anim.SetBool("Idle", true);
         }
@@ -183,6 +331,12 @@ public class Movement : MonoBehaviour
         // A Key - Side walk left
         if (Keyboard.current.aKey.wasPressedThisFrame)
         {
+            if (NickCarryAway != null && stopAnims)
+            {
+                NickTrans.transform.localPosition = new Vector2(2.82f, 0);
+                MeyerTrans.transform.localPosition = new Vector2(5.87f, 0);
+
+            }
             walkingS = true;
         }
         if (Keyboard.current.aKey.isPressed)
@@ -191,12 +345,18 @@ public class Movement : MonoBehaviour
             anim.SetBool(walkingS ? "SideWalk" : "IdleSide", true);
             if (NickCarryAway != null && stopAnims)
             {
+
+
                 SetNickFalse();
                 ani.SetBool(walkingS ? "SideW" : "Side", true);
                 NickCarryAway.GetComponent<SpriteRenderer>().flipX = false;
-                SetWolfFalse();
-                wAni.SetBool(walkingS ? "SideW" : "Side", true);
-                Meyer.GetComponent<SpriteRenderer>().flipX = false;
+                if (rc.DoneWithMeyer)
+                {
+                    SetWolfFalse();
+                    wAni.SetBool(walkingS ? "SideW" : "Side", true);
+                    Meyer.GetComponent<SpriteRenderer>().flipX = false;
+                }
+
             }
             Ray.transform.rotation = new Quaternion(0, 0, -90, 90);
             Ray.transform.localPosition = new Vector2(-2.08f, 0);
@@ -210,8 +370,12 @@ public class Movement : MonoBehaviour
             {
                 SetNickFalse();
                 ani.SetBool("Side", true);
-                SetWolfFalse();
-                wAni.SetBool("Side", true);
+                if (rc.DoneWithMeyer)
+                {
+                    SetWolfFalse();
+                    wAni.SetBool("Side", true);
+                }
+                
             }
             anim.SetBool("IdleSide", true);
         }
@@ -219,7 +383,13 @@ public class Movement : MonoBehaviour
         // D Key - Side walk right
         if (Keyboard.current.dKey.wasPressedThisFrame)
         {
-            walkingS = true;
+            if (NickCarryAway != null && stopAnims)
+            {
+                NickTrans.transform.localPosition = new Vector2(-2.82f, 0);
+                MeyerTrans.transform.localPosition = new Vector2(-5.87f, 0);
+
+            }
+                walkingS = true;
         }
         if (Keyboard.current.dKey.isPressed)
         {
@@ -230,9 +400,13 @@ public class Movement : MonoBehaviour
                 SetNickFalse();
                 ani.SetBool(walkingS ? "SideW" : "Side", true);
                 NickCarryAway.GetComponent<SpriteRenderer>().flipX = true;
-                SetWolfFalse();
-                wAni.SetBool(walkingS ? "SideW" : "Side", true);
-                Meyer.GetComponent<SpriteRenderer>().flipX = true;
+                if (rc.DoneWithMeyer)
+                {
+                    SetWolfFalse();
+                    wAni.SetBool(walkingS ? "SideW" : "Side", true);
+                    Meyer.GetComponent<SpriteRenderer>().flipX = true;
+                }
+
             }
             Ray.transform.rotation = new Quaternion(0, 0, -90, 90);
             Ray.transform.localPosition = new Vector2(2.08f, 0);
@@ -247,8 +421,12 @@ public class Movement : MonoBehaviour
             {
                 SetNickFalse();
                 ani.SetBool("Side", true);
-                SetWolfFalse();
-                wAni.SetBool("Side", true);
+                if (rc.DoneWithMeyer)
+                {
+                    SetWolfFalse();
+                    wAni.SetBool("Side", true);
+                }
+                
             }
             anim.SetBool("IdleSide", true);
         }
@@ -288,4 +466,5 @@ public class Movement : MonoBehaviour
             SceneManager.LoadScene(3);
         }
     }
+
 }

@@ -84,6 +84,23 @@ public class raycast : MonoBehaviour
     public string[] SecondWaveLines;
     public int[] SecondWaveProfs;
     int secondWaveLines;
+    public bool MeyersDepart;
+    public bool NickRun;
+    bool LookingAtTom;
+    public string[] TomLines;
+    public int[] TomProfs;
+    int currentTom = 0;
+    public bool ReadyForTom = false;
+    public bool endThisThing = true;
+    bool TomDead;
+    bool NicksCarHere = false;
+    public string[] NickCarDialogue;
+    public int[] NickCarProf;
+    int nickCar = 0;
+    public bool nickLeave = false;
+    bool nickLeft = false;
+    bool NextDaisy = false;
+    bool LeaveScene = false;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -120,14 +137,52 @@ public class raycast : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (NextDaisy && LeaveScene)
+        {
+            Debug.Log("Next Scene");
+        }
+        if (NicksCarHere && Keyboard.current.eKey.wasPressedThisFrame)
+        {
+            if (nickCar < NickCarDialogue.Length - 1)
+            {
+                ts.Interaction(NickCarDialogue[nickCar], NickCarProf[nickCar]);
+                nickCar++;
+            } else
+            {
+                if (!nickLeft)
+                {
+                    nickLeave = true;
+                    nickLeft = true;
+                }
+                LeaveScene = true;
+                ts.off();
+            }
+        }
+        if (LookingAtTom && ReadyForTom && Keyboard.current.eKey.wasPressedThisFrame)
+        {
+            if (currentTom >= TomLines.Length)
+            {
+                TomDead = true;
+                ts.off();
+            } else
+            {
+                ts.Interaction(TomLines[currentTom], TomProfs[currentTom]);
+                currentTom++;
+            }
+        }
         if (PhoneDone && lookingAtTable && Keyboard.current.eKey.wasPressedThisFrame)
         {
+            if (secondWaveLines == 5)
+            {
+                MeyersDepart = true;
+            }
             if (secondWaveLines < SecondWaveLines.Length)
             {
                 ts.Interaction(SecondWaveLines[secondWaveLines], SecondWaveProfs[secondWaveLines]);
                 secondWaveLines++;
             } else
             {
+                NickRun = true;
                 ts.off();
             }
         }
@@ -143,7 +198,7 @@ public class raycast : MonoBehaviour
                 ts.off();
             }
         }
-        if (lookingAtTable && Keyboard.current.eKey.wasPressedThisFrame && DoneWithMeyer)
+        if (lookingAtTable && Keyboard.current.eKey.wasPressedThisFrame && DoneWithMeyer && !NickRun)
         {
             tableSeated = true;
         } else
@@ -354,9 +409,9 @@ public class raycast : MonoBehaviour
 
                 }
             }
-            else
+            else if(SceneManager.GetActiveScene().buildIndex != 8)
             {
-                if (CurrentLine == MeyerLines.Length - 1)
+                if (CurrentLine >= MeyerLines.Length - 1)
                 {
                     ts.off();
                     ob.newObj = true;
@@ -461,13 +516,32 @@ public class raycast : MonoBehaviour
             talkingToWaiter = true;
         } else if (other.gameObject.CompareTag("TableNYC"))
         {
-            chosentable = other.gameObject;
+            if (!endThisThing)
+            {
+                chosentable = other.gameObject;
 
-            lookingAtTable = true;
+                lookingAtTable = true;
+            }
+
             
         } else if (other.gameObject.CompareTag("Phone2"))
         {
             SecondPhone = true;
+        } else if (other.gameObject.CompareTag("TomBuch"))
+        {
+            LookingAtTom = true;
+        } else if (other.gameObject.CompareTag("YellowCar"))
+        {
+            if (TomDead)
+            {
+                SceneManager.LoadScene(9);
+            }
+        } else if(other.gameObject.CompareTag("NicksCarryCar"))
+        {
+            NicksCarHere = true;
+        } if (other.gameObject.CompareTag("NextSceneDaisy"))
+        {
+            NextDaisy = true;
         }
     }
     void OnTriggerExit2D(Collider2D other) {

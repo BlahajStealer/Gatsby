@@ -26,6 +26,13 @@ public class CarScript : MonoBehaviour
     int currentOne = 0;
     float Timer = 0;
     public GameObject Panel;
+    public bool goingLeft = false;
+    public GameObject Myrtle;
+    public Sprite MyrtleAlive;
+    public Sprite MyrtleDead;
+    public float SpeedOfCrash;
+    bool startThis;
+    
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -46,9 +53,13 @@ public class CarScript : MonoBehaviour
                 anim.SetBool("Start", false);
             }
         }
-        if (speed < MaxSpeed && !Finishing)
+        if ((speed < MaxSpeed && speed > -9) && !Finishing)
         {
             speed += Time.deltaTime * speedUpMult;
+
+        } else if ((speed > MaxSpeed && speed <= -10) && !Finishing)
+        {
+            speed -= Time.deltaTime * speedUpMult;
 
         }
         if (Finishing && speed >= 0)
@@ -56,7 +67,7 @@ public class CarScript : MonoBehaviour
             Debug.Log("Still here");
             speed -= Time.deltaTime * slowDownMult;
         }
-        if (speed < 0)
+        if (speed < 0 && speed > -9)
         {
             speed = 0;
         }
@@ -102,9 +113,14 @@ public class CarScript : MonoBehaviour
         if (Finishing && Car.transform.position.y <= 2.366f)
         {
             move.y = .3f;
+        } if (startThis)
+        {
+            Debug.Log("Hello");
+            move.y = .5f;
         }
-        move.x = 1;
-        Vector2 position = (Vector2)rb.position + move * speed * Time.deltaTime;
+        move.x = goingLeft ? -1 : 1;
+        Vector2 position = (Vector2)rb.position + move * Mathf.Abs(speed) * Time.deltaTime;
+
         rb.MovePosition(position);
         if (NotDestroyed && Finishing)
         {
@@ -141,13 +157,21 @@ public class CarScript : MonoBehaviour
             {
                 Car.transform.position = new Vector2(261, Car.transform.position.y);
             }
+        } if (other.gameObject.CompareTag("Time To die Myrtle"))
+        {
+            Debug.Log("MyrtleDeath");
+
+            startThis = true;
+        } if (other.gameObject.CompareTag("Myrtle"))
+        {
+            Myrtle.GetComponent<SpriteRenderer>().sprite = MyrtleDead;
         }
     }
     public void Retry()
     {
         Time.timeScale = 1;
 
-        SceneManager.LoadScene(7);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
     public void Skip()
     {

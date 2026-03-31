@@ -26,6 +26,12 @@ TagManager:
   - TableNYC
   - Waiter
   - Phone2
+  - TomBuch
+  - YellowCar
+  - NicksCarryCar
+  - NextSceneDaisy
+  - Myrtle
+  - Time To die Myrtle
   layers:
   - Default
   - TransparentFX

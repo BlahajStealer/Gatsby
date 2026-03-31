@@ -12,8 +12,8 @@ EditorBuildSettings:
     path: Assets/Scenes/Start.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
   - enabled: 1
-    path: Assets/Scenes/FirstHouse.unity
-    guid: 8e6d632adb979944c9a1065f354664aa
+    path: Assets/Scenes/First House.unity
+    guid: eec8b570121e6d541b92c51a89e48a1c
   - enabled: 1
     path: Assets/Scenes/Pharmacy.unity
     guid: a5d3d5ad3e4fe47ada1d0306e726da48
@@ -32,6 +32,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/NYC.unity
     guid: 399784b45f5873242b8904d4c19a0dc6
+  - enabled: 1
+    path: Assets/Scenes/Daisys.unity
+    guid: 8e6d632adb979944c9a1065f354664aa
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0
