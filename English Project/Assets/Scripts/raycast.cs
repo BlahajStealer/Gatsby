@@ -101,9 +101,16 @@ public class raycast : MonoBehaviour
     bool nickLeft = false;
     bool NextDaisy = false;
     bool LeaveScene = false;
+    
+    public string[] HotelLines;
+    public int[] HotelProfs;
+    int HotelInt = 0;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
-    {
+    {            
+
+
+
         if (mmObj != null)
         {
             mm = mmObj.GetComponent<MinigameManager>();
@@ -125,10 +132,10 @@ public class raycast : MonoBehaviour
             {
                 GatsbyText.SetActive(false);
             
-            }
-                
-            
+            }  
         }
+        ts.Interaction(HotelLines[HotelInt], HotelProfs[HotelInt]);
+        HotelInt++;
 
 
 
@@ -137,6 +144,14 @@ public class raycast : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (HotelInt < HotelLines.Length && Keyboard.current.eKey.wasPressedThisFrame)
+        {
+            ts.Interaction(HotelLines[HotelInt], HotelProfs[HotelInt]);
+            HotelInt++;
+        } else if (HotelInt >= HotelLines.Length)
+        {
+            ts.off();
+        }
         if (NextDaisy && LeaveScene)
         {
             Debug.Log("Next Scene");
